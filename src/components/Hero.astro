@@ -1,0 +1,13 @@
+---
+// src/components/Hero.astro
+const { title, subtitle, primaryButton, secondaryButton } = Astro.props;
+---
+
+<section style="text-align: center; padding: 4rem 2rem;">
+  <h1>{title}</h1>
+  <p style="font-size: 1.2rem; max-width: 40rem; margin: 1rem auto;">{subtitle}</p>
+  <div style="margin-top: 1.5rem;">
+    <a href={primaryButton.href} style="margin-right: 1rem;">{primaryButton.text}</a>
+    <a href={secondaryButton.href}>{secondaryButton.text}</a>
+  </div>
+</section>

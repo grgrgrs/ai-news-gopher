@@ -1,0 +1,39 @@
+---
+import { getCollection, getEntryBySlug } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+console.log("🚀 Starting [slug].astro");
+// ✅ Static paths for dynamic routing
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  console.log("📌 STATIC PATHS:");
+  for (const post of allPosts) {
+    console.log(" - Slug:", post.slug, "| ID:", post.id);
+  }
+  console.log("STATIC PATHS: got", allPosts.length, "posts");
+  console.log(allPosts);
+  return allPosts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+// ✅ Load content by slug
+const { slug } = Astro.params;
+console.log("⚠️ Astro.params.slug =", slug);
+
+const post = await getEntryBySlug('blog', slug);
+
+if (!post) {
+  console.log("DEBUG - No post found for slug:", slug);
+  throw new Error(`Post not found: ${slug}`);
+}
+console.log("DEBUG - Found post:", post.id);
+const { Content } = await post.render();
+---
+
+<BaseLayout title={post.data.title}>
+  <article>
+    <h2>{post.data.title}</h2>
+    <p><em>{post.data.pubDate.toDateString()}</em></p>
+    <Content />
+  </article>
+</BaseLayout>
