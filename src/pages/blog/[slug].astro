@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+const allPosts = await getCollection('blog');
+
+const { slug } = Astro.params;
+const post = allPosts.find((p) => p.slug === slug);
+
+if (!post) {
+  throw new Error(`Post not found for slug: ${slug}`);
+}
+---
+
+<article>
+  <h1>{post.data.title}</h1>
+  <p><em>{post.data.pubDate?.toDateString()}</em></p>
+  <div innerHTML={post.body} />
+</article>
