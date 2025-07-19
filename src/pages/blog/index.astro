@@ -1,18 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
-import { format } from 'date-fns';
-const allPosts = await getCollection('blog');
-const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
-const url = new URL(Astro.request.url);
-const slug = url.searchParams.get('slug');
-const selected = sorted.find(p => p.slug === slug) ?? sorted[0];
-const { Content } = await selected.render();
+const posts = await getCollection('blog');
 ---
-<h1>{selected.data.title}</h1>
-<p><em>{format(selected.data.pubDate, 'PPP')}</em></p>
-<Content />
+
+<h1>Blog Posts</h1>
 <ul>
-  {sorted.map(p => (
-    <li><a href={`/blog?slug=${p.slug}`}>{p.data.title}</a></li>
+  {posts.map((post) => (
+    <li>
+      <strong>slug:</strong> {post.slug}<br />
+      <strong>title:</strong> {post.data.title}<br />
+      <a href={`/blog/${post.slug}`}>Visit</a>
+    </li>
   ))}
 </ul>

@@ -1,0 +1,49 @@
+# === Node (Astro) ===
+node_modules/
+dist/
+.cache/
+*.log
+npm-debug.log*
+
+# Astro build artifacts
+public/build/
+public/assets/
+
+# === Python (FastAPI) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+.env
+.venv/
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+*.egg
+pip-log.txt
+
+# === OS files ===
+.DS_Store
+Thumbs.db
+
+# === Fly.io local files ===
+fly.toml
+fly.astro.toml
+Dockerfile.astro
+.fly/
+.secrets/
+*.bak
+
+# === VS Code ===
+.vscode/
+*.code-workspace
+
+# === General ===
+*.swp
+*.swo
+*.tmp
+*.bak
