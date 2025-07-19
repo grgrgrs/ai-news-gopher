@@ -1,73 +1,7 @@
----
-const { title } = Astro.props;
-import '../styles/global.css';
----
-
-<html lang="en">
-  <head>
-    <link href="https://fonts.googleapis.com/css2?family=IniraSerif:wght@300;350;400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" href="/images/moebius-square.svg" type="image/svg+xml" />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <style>
-
-
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0.5rem;
-      }
-
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 0rem;
-        margin-bottom: 0rem;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: 1.8rem;
-      }
-
-      nav a {
-        margin-left: 1rem;
-        text-decoration: none;
-        color: #663399;
-        font-size: 0.95rem;
-      }
-
-      footer {
-        margin-top: 3rem;
-        border-top: 1px solid #ccc;
-        text-align: center;
-        padding-top: 1.5rem;
-        font-size: 0.9rem;
-        color: #666;
-      }
-    </style>
-  </head>
+<html>
+  <head><title><slot name="title" /></title></head>
   <body>
-    <div class="container">
-      <header>
-        <h1>George Roger’s Lens</h1>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/blog">Blog</a>
-          <a href="/about">About</a>
-        </nav>
-      </header>
-
-      <main>
-        <slot />
-      </main>
-
-      <footer>
-        <p>&copy; 2025 George Rogers. All rights reserved.</p>
-      </footer>
-    </div>
+    <header><a href="/">Home</a> | <a href="/blog">Blog</a></header>
+    <main><slot /></main>
   </body>
 </html>

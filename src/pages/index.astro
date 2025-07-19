@@ -1,34 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-
-const posts = await getCollection('blog');
-const sortedPosts = posts
-  .filter(p => p.data.pubDate)
-  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
-
-const latestPost = sortedPosts[0];
+const allPosts = await getCollection('blog');
+const latest = allPosts.sort((a,b) => b.data.pubDate - a.data.pubDate)[0];
 ---
-
-<BaseLayout title="George Roger’s Lens">
-  <section class="top-section">
-    {latestPost ? (
-      <article>
-        <p><em>{new Date(latestPost.data.pubDate).toDateString()}</em></p>
-        <p>{latestPost.data.description}</p>
-        <p>More at <a href={`/blog/${latestPost.slug}`}>{latestPost.data.title}</a></p>
-      </article>
-    ) : (
-      <p>No recent blog post found.</p>
-    )}
-  </section>
-
-  <section style="margin-top: 2rem;">
-    <h2>Blog History</h2>
-    <ul>
-      {sortedPosts.map((post) => (
-        <li><a href={`/blog/${post.slug}`}>{post.data.title}</a></li>
-      ))}
-    </ul>
-  </section>
-</BaseLayout>
+<html><body>
+  <h1>Latest Post</h1>
+  <h2>{latest.data.title}</h2>
+  <a href={`/blog?slug=${latest.slug}`}>Read more</a>
+  <h2>Top Articles</h2>
+  <div id="articles">Loading...</div>
+  <script>
+    fetch('/api/articles').then(r => r.json()).then(data => {
+      document.getElementById('articles').innerText = JSON.stringify(data);
+    });
+  </script>
+</body></html>

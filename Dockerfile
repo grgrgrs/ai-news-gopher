@@ -1,18 +1,17 @@
-# Use official Node image to build Astro frontend
-FROM node:18 AS frontend
-
+FROM node:18-bullseye as frontend
 WORKDIR /app
 COPY . .
 RUN npm install
 RUN npm run build
 
-# Use Python image for backend
-FROM python:3.10-slim AS backend
-
-# Install backend dependencies
+FROM python:3.11-slim as backend
 WORKDIR /app
-COPY --from=frontend /app /app
-RUN pip install --no-cache-dir -r backend/requirements.txt
+COPY backend backend
+RUN pip install -r backend/requirements.txt
 
-# Expose FastAPI app
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8080"]
+FROM node:18-bullseye as runner
+WORKDIR /app
+COPY --from=frontend /app .
+COPY --from=backend /app/backend ./backend
+EXPOSE 8080
+CMD ["node", "dist/server/entry.mjs"]

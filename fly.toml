@@ -1,10 +1,12 @@
-app = "tobori"
+# fly.toml app configuration file generated for ai-news-gopher on 2025-07-18T17:11:37-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "ai-news-gopher"
+primary_region = 'mia'
 
 [build]
-  dockerfile = "Dockerfile"
-
-[env]
-  PORT = "8080"
 
 [[services]]
   internal_port = 8080
@@ -17,3 +19,9 @@ app = "tobori"
   [[services.ports]]
     handlers = ["tls", "http"]
     port = 443
+
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
