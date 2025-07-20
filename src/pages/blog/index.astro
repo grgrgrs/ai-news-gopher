@@ -41,7 +41,8 @@ const { Content } = await selected.render();
         slug: post.slug,
         title: post.data.title,
         date: format(post.data.pubDate, 'PPP'),
-        content: (await post.render()).Content.toString()
+        content: (await post.render()).html
+
       }))
     )
   )}
