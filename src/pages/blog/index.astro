@@ -1,69 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
-import { format } from 'date-fns';
 
-const allPosts = await getCollection('blog');
-const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
-
-// Get slug from URL
-const url = new URL(Astro.request.url);
-const slug = url.searchParams.get('slug');
-console.log("🪵 Server: slug from URL:", slug);
-
-// Find matching post
-const selected = sorted.find((p) => p.slug === slug) ?? sorted[0];
-console.log("🪵 Server: selected post slug:", selected?.slug);
-
-// Prepare rendered content for all posts
-const renderedPosts = await Promise.all(
-  sorted.map(async (post) => {
-
-    const html = (await post.render()).html ?? "";
-    console.log(`🪵 Server: preparing post: ${post.slug}, content length: ${html.length}`);
-
-    return {
-      slug: post.slug,
-      title: post.data.title,
-      date: format(post.data.pubDate, 'PPP'),
-      content: html
-    };
-  })
-);
+const posts = await getCollection('blog');
+const sorted = posts.sort((a, b) => b.data.pubDate - a.data.pubDate);
 ---
 
-<h1 id="post-title">{selected.data.title}</h1>
-<p id="post-date"><em>{format(selected.data.pubDate, 'PPP')}</em></p>
-<div id="post-content" set:html={(await selected.render()).html}></div>
-
-<section style="margin-top: 2rem;">
-  <h2>Blog History</h2>
-  <ul>
-    {sorted.map((post) => (
-      <li>
-        <a href={`/blog?slug=${post.slug}`}>{post.data.title}</a>
-      </li>
-    ))}
-  </ul>
-</section>
-
-<script type="application/json" id="post-data">
-  {JSON.stringify(renderedPosts)}
-</script>
-
-<script>
-  console.log("🪵 Client: script loaded");
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const slug = urlParams.get("slug");
-  console.log("🪵 Client: slug from URL params:", slug);
-
-  const postData = JSON.parse(document.getElementById("post-data").textContent);
-  console.log("🪵 Client: loaded postData slugs:", postData.map(p => p.slug));
-
-  const selected = postData.find(p => p.slug === slug) ?? postData[0];
-  console.log("🪵 Client: selected post:", selected.slug);
-
-  document.getElementById("post-title").textContent = selected.title;
-  document.getElementById("post-date").textContent = selected.date;
-  document.getElementById("post-content").innerHTML = selected.content;
-</script>
+<h1>Blog</h1>
+<ul>
+  {sorted.map((post) => (
+    <li>
+      <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+    </li>
+  ))}
+</ul>
