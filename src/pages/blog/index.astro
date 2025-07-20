@@ -18,7 +18,9 @@ console.log("🪵 Server: selected post slug:", selected?.slug);
 const renderedPosts = await Promise.all(
   sorted.map(async (post) => {
     const html = (await post.render()).html;
+    const html = (await post.render()).html ?? "";
     console.log(`🪵 Server: preparing post: ${post.slug}, content length: ${html.length}`);
+
     return {
       slug: post.slug,
       title: post.data.title,
