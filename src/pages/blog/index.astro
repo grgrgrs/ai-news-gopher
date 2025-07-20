@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import { format } from 'date-fns';
+
+const allPosts = await getCollection('blog');
+const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
+
+// Get the slug from the URL (if any)
+const url = new URL(Astro.request.url);
+const slug = url.searchParams.get('slug');
+
+// Use selected post if slug matches, else fallback to latest
+const selected = sorted.find((p) => p.slug === slug) ?? sorted[0];
+const { Content } = await selected.render();
+---
+
+<h1>{selected.data.title}</h1>
+<p><em>{format(selected.data.pubDate, 'PPP')}</em></p>
+<Content />
+
+<section style="margin-top: 2rem;">
+  <h2>Blog History</h2>
+  <ul>
+    {sorted.map((post) => (
+      <li>
+        <a href={`/blog?slug=${post.slug}`}>
+          {post.data.title}
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
