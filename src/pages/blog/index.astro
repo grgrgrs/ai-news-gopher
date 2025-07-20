@@ -5,29 +5,81 @@ import { format } from 'date-fns';
 const allPosts = await getCollection('blog');
 const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
 
-// Get the slug from the URL (if any)
+// Initial slug selection
 const url = new URL(Astro.request.url);
 const slug = url.searchParams.get('slug');
-
-// Use selected post if slug matches, else fallback to latest
 const selected = sorted.find((p) => p.slug === slug) ?? sorted[0];
 const { Content } = await selected.render();
 ---
 
-<h1>{selected.data.title}</h1>
-<p><em>{format(selected.data.pubDate, 'PPP')}</em></p>
-<Content />
+<!-- Selected Blog Post -->
+<article id="post">
+  <h1>{selected.data.title}</h1>
+  <p><em>{format(selected.data.pubDate, 'PPP')}</em></p>
+  <Content />
+</article>
 
+<!-- Blog List -->
 <section style="margin-top: 2rem;">
   <h2>Blog History</h2>
-  <ul>
+  <ul id="blog-list">
     {sorted.map((post) => (
       <li>
-        <a href={`/blog?slug=${post.slug}`}>
+        <a href={`/blog?slug=${post.slug}`} class="post-link" data-slug={post.slug}>
           {post.data.title}
         </a>
       </li>
     ))}
   </ul>
-
 </section>
+
+<!-- Inject all post HTML as JSON -->
+<script type="application/json" id="post-data">
+  {JSON.stringify(
+    await Promise.all(
+      sorted.map(async (post) => ({
+        slug: post.slug,
+        title: post.data.title,
+        date: format(post.data.pubDate, 'PPP'),
+        content: (await post.render()).Content.toString()
+      }))
+    )
+  )}
+</script>
+
+<!-- Slug Switching Script -->
+<script type="module">
+  const postData = JSON.parse(document.getElementById("post-data").textContent);
+  const links = document.querySelectorAll(".post-link");
+  const postEl = document.getElementById("post");
+
+  for (const link of links) {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const slug = link.dataset.slug;
+      const post = postData.find((p) => p.slug === slug);
+      if (!post) return;
+
+      // Update article content
+      postEl.innerHTML = `
+        <h1>${post.title}</h1>
+        <p><em>${post.date}</em></p>
+        ${post.content}
+      `;
+
+      // Update URL without reload
+      history.pushState(null, "", `?slug=${slug}`);
+    });
+  }
+
+  // Handle back/forward navigation
+  window.addEventListener("popstate", () => {
+    const slug = new URL(window.location.href).searchParams.get("slug");
+    const post = postData.find((p) => p.slug === slug) ?? postData[0];
+    postEl.innerHTML = `
+      <h1>${post.title}</h1>
+      <p><em>${post.date}</em></p>
+      ${post.content}
+    `;
+  });
+</script>
