@@ -1,17 +1,25 @@
 ---
 import { getCollection } from 'astro:content';
-const allPosts = await getCollection('blog');
+import { format } from 'date-fns';
 
+// Generate the post from the slug passed via static route
 const { slug } = Astro.params;
-const post = allPosts.find((p) => p.slug === slug);
+const post = (await getCollection('blog')).find((p) => p.slug === slug);
 
-if (!post) {
-  throw new Error(`Post not found for slug: ${slug}`);
+if (!post) throw new Error(`Post not found: ${slug}`);
+
+const { Content } = await post.render();
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }));
 }
+
+
 ---
 
-<article>
-  <h1>{post.data.title}</h1>
-  <p><em>{post.data.pubDate?.toDateString()}</em></p>
-  <div innerHTML={post.body} />
-</article>
+<h1>{post.data.title}</h1>
+<p><em>{format(post.data.pubDate, 'PPP')}</em></p>
+<Content />
