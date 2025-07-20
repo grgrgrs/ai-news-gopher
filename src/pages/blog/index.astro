@@ -22,9 +22,10 @@ const { Content } = await selected.render();
 <ul>
   {sorted.map((p) => (
     <li>
-      <a href={`/blog?slug=${p.slug}`}>
+      <a href={`/blog/${p.slug}`}>
         {p.data.title}
       </a>
     </li>
   ))}
 </ul>
+
