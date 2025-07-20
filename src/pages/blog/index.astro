@@ -5,82 +5,63 @@ import { format } from 'date-fns';
 const allPosts = await getCollection('blog');
 const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
 
-// Initial slug selection
+// Get slug from URL
 const url = new URL(Astro.request.url);
 const slug = url.searchParams.get('slug');
+console.log("🪵 Server: slug from URL:", slug);
+
+// Find matching post
 const selected = sorted.find((p) => p.slug === slug) ?? sorted[0];
-const { Content } = await selected.render();
+console.log("🪵 Server: selected post slug:", selected?.slug);
+
+// Prepare rendered content for all posts
+const renderedPosts = await Promise.all(
+  sorted.map(async (post) => {
+    const html = (await post.render()).html;
+    console.log(`🪵 Server: preparing post: ${post.slug}, content length: ${html.length}`);
+    return {
+      slug: post.slug,
+      title: post.data.title,
+      date: format(post.data.pubDate, 'PPP'),
+      content: html
+    };
+  })
+);
 ---
 
-<!-- Selected Blog Post -->
-<article id="post">
-  <h1>{selected.data.title}</h1>
-  <p><em>{format(selected.data.pubDate, 'PPP')}</em></p>
-  <Content />
-</article>
+<h1 id="post-title">{selected.data.title}</h1>
+<p id="post-date"><em>{format(selected.data.pubDate, 'PPP')}</em></p>
+<div id="post-content" set:html={(await selected.render()).html}></div>
 
-<!-- Blog List -->
 <section style="margin-top: 2rem;">
   <h2>Blog History</h2>
-  <ul id="blog-list">
+  <ul>
     {sorted.map((post) => (
       <li>
-        <a href={`/blog?slug=${post.slug}`} class="post-link" data-slug={post.slug}>
-          {post.data.title}
-        </a>
+        <a href={`/blog?slug=${post.slug}`}>{post.data.title}</a>
       </li>
     ))}
   </ul>
 </section>
 
-<!-- Inject all post HTML as JSON -->
 <script type="application/json" id="post-data">
-  {Astro.escapeHTML(JSON.stringify(
-    await Promise.all(
-      sorted.map(async (post) => ({
-        slug: post.slug,
-        title: post.data.title,
-        date: format(post.data.pubDate, 'PPP'),
-        content: (await post.render()).html
-
-      }))
-    )
-  ))}
+  {JSON.stringify(renderedPosts)}
 </script>
 
-<!-- Slug Switching Script -->
-<script type="module">
+<script>
+  console.log("🪵 Client: script loaded");
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get("slug");
+  console.log("🪵 Client: slug from URL params:", slug);
+
   const postData = JSON.parse(document.getElementById("post-data").textContent);
-  const links = document.querySelectorAll(".post-link");
-  const postEl = document.getElementById("post");
+  console.log("🪵 Client: loaded postData slugs:", postData.map(p => p.slug));
 
-  for (const link of links) {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const slug = link.dataset.slug;
-      const post = postData.find((p) => p.slug === slug);
-      if (!post) return;
+  const selected = postData.find(p => p.slug === slug) ?? postData[0];
+  console.log("🪵 Client: selected post:", selected.slug);
 
-      // Update article content
-      postEl.innerHTML = `
-        <h1>${post.title}</h1>
-        <p><em>${post.date}</em></p>
-        ${post.content}
-      `;
-
-      // Update URL without reload
-      history.pushState(null, "", `?slug=${slug}`);
-    });
-  }
-
-  // Handle back/forward navigation
-  window.addEventListener("popstate", () => {
-    const slug = new URL(window.location.href).searchParams.get("slug");
-    const post = postData.find((p) => p.slug === slug) ?? postData[0];
-    postEl.innerHTML = `
-      <h1>${post.title}</h1>
-      <p><em>${post.date}</em></p>
-      ${post.content}
-    `;
-  });
+  document.getElementById("post-title").textContent = selected.title;
+  document.getElementById("post-date").textContent = selected.date;
+  document.getElementById("post-content").innerHTML = selected.content;
 </script>
