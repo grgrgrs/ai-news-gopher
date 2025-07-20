@@ -2,11 +2,13 @@
 import { getCollection } from 'astro:content';
 import { format } from 'date-fns';
 
-const posts = await getCollection('blog');
-const sorted = posts.sort((a, b) => b.data.pubDate - a.data.pubDate);
+const allPosts = await getCollection('blog');
+const sorted = allPosts.sort((a, b) => b.data.pubDate - a.data.pubDate);
+
 const url = new URL(Astro.request.url);
 const slug = url.searchParams.get('slug');
 const selected = sorted.find(p => p.slug === slug) ?? sorted[0];
+
 const { Content } = await selected.render();
 ---
 
@@ -16,10 +18,13 @@ const { Content } = await selected.render();
 
 <hr />
 
+<h2>Blog History</h2>
 <ul>
   {sorted.map((p) => (
     <li>
-      <a href={`/blog?slug=${p.slug}`}>{p.data.title}</a>
+      <a href={`/blog?slug=${p.slug}`}>
+        {p.data.title}
+      </a>
     </li>
   ))}
 </ul>
