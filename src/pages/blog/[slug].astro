@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import { format } from 'date-fns';
+
+const posts = await getCollection('blog');
+const sorted = posts.sort((a, b) => b.data.pubDate - a.data.pubDate);
+---
+
+<h1>All Blog Posts</h1>
+<ul>
+  {sorted.map((post) => (
+    <li>
+      <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+      <br />
+      <small><em>{format(post.data.pubDate, 'PPP')}</em></small>
+    </li>
+  ))}
+</ul>
