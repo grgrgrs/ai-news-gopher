@@ -23,7 +23,7 @@ const { Content } = await selected.render();
   <ul>
     {sorted.map((post) => (
       <li>
-        <a href={`/blog?slug=${post.slug}`} onclick="location.href=this.href">
+        <a href={`/blog?slug=${post.slug}`}>
           {post.data.title}
         </a>
       </li>
