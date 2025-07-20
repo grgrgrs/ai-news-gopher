@@ -35,7 +35,7 @@ const { Content } = await selected.render();
 
 <!-- Inject all post HTML as JSON -->
 <script type="application/json" id="post-data">
-  {JSON.stringify(
+  {Astro.escapeHTML(JSON.stringify(
     await Promise.all(
       sorted.map(async (post) => ({
         slug: post.slug,
@@ -45,7 +45,7 @@ const { Content } = await selected.render();
 
       }))
     )
-  )}
+  ))}
 </script>
 
 <!-- Slug Switching Script -->
